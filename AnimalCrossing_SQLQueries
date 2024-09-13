@@ -1,0 +1,30 @@
+ALTER TABLE `tranquil-matter-428422-s0.animal_crossing.taxonomy`
+RENAME COLUMN `Common Name` TO Name;
+
+
+SELECT DISTINCT
+  insects.Name,
+  `Order`
+FROM
+  `tranquil-matter-428422-s0.animal_crossing.game_insects` AS insects
+LEFT OUTER JOIN
+  `tranquil-matter-428422-s0.animal_crossing.taxonomy` AS taxonomy
+  ON insects.Name = taxonomy.Name
+  OR insects.Name = SPLIT(taxonomy.Name, ' ')[SAFE_ORDINAL(2)]
+  OR SPLIT(insects.Name, ' ')[SAFE_ORDINAL(2)] = SPLIT(taxonomy.Name, ' ')[SAFE_ORDINAL(2)];
+
+
+SELECT
+  insects_real.Order,
+  IFNULL(Count_AC, 0) AS Count_AC,
+  Count_Japan,
+  Count_world
+FROM
+  (
+  SELECT 
+    `Order`, 
+    COUNT(Name) AS Count_AC FROM `tranquil-matter-428422-s0.animal_crossing.orders_clean` GROUP BY `Order`
+    ) AS orders
+RIGHT OUTER JOIN
+  `tranquil-matter-428422-s0.animal_crossing.Japan_world_insects` AS insects_real
+  ON orders.Order = insects_real.Order;
